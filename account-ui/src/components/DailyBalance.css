@@ -1,0 +1,4 @@
+.daily-balance {
+    display: flex;
+    justify-content: space-between;
+}

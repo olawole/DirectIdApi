@@ -1,10 +1,8 @@
-﻿using DirectId.Api.Utils;
+﻿using DirectId.Api.Models;
+using DirectId.Api.Utils;
 using DirectId.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DirectId.Api.Controllers
@@ -13,31 +11,19 @@ namespace DirectId.Api.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService accountService;
+        private readonly IAccountComposer accountComposer;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountComposer accountComposer)
         {
-            this.accountService = accountService;
+            this.accountComposer = accountComposer;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CalculateDailyBalanceAsync(IFormFile file)
+        public async Task<IActionResult> CalculateDailyBalanceAsync([FromBody] AccountRequest accountRequest)
         {
-            if (file == null)
-            {
-                return BadRequest("No file was uploaded");
-            }
+            var result = await accountComposer.CalculateDailyBalancesAsync(accountRequest.AccountId);
 
-            if (file.ContentType != "application/json")
-            {
-                return BadRequest("Invalid file type, please upload a json document");
-            }
-
-            var data = await file.ReadFileAsync();
-
-            var result = await accountService.CalculateDailyBalancesAsync(data);
-
-            return Ok();
+            return Ok(result);
         }
     }
 }

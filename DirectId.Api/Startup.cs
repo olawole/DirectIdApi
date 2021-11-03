@@ -31,7 +31,8 @@ namespace DirectId.Api
                 });
             });
             services.AddSwaggerGen();
-            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAccountDataService, AccountDataService>();
+            services.AddScoped<IAccountComposer, AccountComposer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +44,8 @@ namespace DirectId.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors();
 
             app.UseRouting();
 

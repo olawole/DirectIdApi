@@ -1,5 +1,6 @@
 using DirectId.Data.Interfaces;
 using DirectId.Data.Services;
+using DirectId.Domain.Composers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

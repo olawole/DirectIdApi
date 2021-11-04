@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DirectId.Data.Services
+namespace DirectId.Domain.Comparer
 {
     public class SortDescendingComparer<T> : IComparer<T> where T : IComparable<T>
     {

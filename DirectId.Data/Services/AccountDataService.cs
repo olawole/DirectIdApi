@@ -14,7 +14,6 @@ namespace DirectId.Data.Services
         private readonly Brand brand;
         public AccountDataService()
         {
-            var dirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string jsonData = File.ReadAllText("Account.json");
             brand = JsonConvert.DeserializeObject<Brand>(jsonData);
         }

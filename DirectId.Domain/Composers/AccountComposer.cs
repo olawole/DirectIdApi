@@ -1,10 +1,11 @@
 ﻿using DirectId.Data.Interfaces;
 using DirectId.Data.Models;
+using DirectId.Domain.Comparer;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DirectId.Data.Services
+namespace DirectId.Domain.Composers
 {
     public class AccountComposer : IAccountComposer
     {
@@ -19,44 +20,53 @@ namespace DirectId.Data.Services
         {
             var account = await accountDataService.GetByIdAsync(accountId);
 
-            SortedDictionary<DateTime, int> dailyTransactionAggregates = new SortedDictionary<DateTime, int>(new SortDescendingComparer<DateTime>());
-
-            int totalCredits = 0, totalDebits = 0;
-
-            foreach (var transaction in account.Transactions)
+            if(account != null)
             {
-                switch (transaction.CreditDebitIndicator)
+                SortedDictionary<DateTime, int> dailyTransactionAggregates = new SortedDictionary<DateTime, int>(new SortDescendingComparer<DateTime>());
+
+                int totalCredits = 0, totalDebits = 0;
+
+                foreach (var transaction in account.Transactions)
                 {
-                    case CreditDebitEnum.Credit:
-                        totalCredits += transaction.Amount;
-                        break;
-                    case CreditDebitEnum.Debit:
-                        totalDebits += transaction.Amount;
-                        break;
+                    switch (transaction.CreditDebitIndicator)
+                    {
+                        case CreditDebitEnum.Credit:
+                            totalCredits += transaction.Amount;
+                            break;
+                        case CreditDebitEnum.Debit:
+                            totalDebits += transaction.Amount;
+                            break;
+                    }
+
+                    if (dailyTransactionAggregates.ContainsKey(transaction.BookingDate.Date))
+                    {
+                        dailyTransactionAggregates[transaction.BookingDate.Date] += GetTransactionAmount(transaction);
+                    }
+                    else
+                    {
+                        dailyTransactionAggregates.Add(transaction.BookingDate.Date, GetTransactionAmount(transaction));
+                    }
                 }
 
-                if (dailyTransactionAggregates.ContainsKey(transaction.BookingDate.Date))
+                List<DailyBalance> dailyBalances = CalculateDailyBalances(account, dailyTransactionAggregates);
+
+                return new DailyBalancesResult
                 {
-                    dailyTransactionAggregates[transaction.BookingDate.Date] += GetTransactionAmount(transaction);
-                }
-                else
-                {
-                    dailyTransactionAggregates.Add(transaction.BookingDate.Date, GetTransactionAmount(transaction));
-                }
+                    AccountId = account.AccountId,
+                    AccountType = account.AccountType,
+                    CurrencyCode = account.CurrencyCode,
+                    DisplayName = account.DisplayName,
+                    TotalCredits = totalCredits,
+                    TotalDebits = totalDebits,
+                    EndOfDayBalances = dailyBalances
+                };
+            }
+            else
+            {
+                return null;
             }
 
-            List<DailyBalance> dailyBalances = CalculateDailyBalances(account, dailyTransactionAggregates);
-
-            return new DailyBalancesResult
-            {
-                AccountId = account.AccountId,
-                AccountType = account.AccountType,
-                CurrencyCode = account.CurrencyCode,
-                DisplayName = account.DisplayName,
-                TotalCredits = totalCredits,
-                TotalDebits = totalDebits,
-                EndOfDayBalances = dailyBalances
-            };
+            
         }
 
         private List<DailyBalance> CalculateDailyBalances(Account account, SortedDictionary<DateTime, int> dailyTransactionAggregates)

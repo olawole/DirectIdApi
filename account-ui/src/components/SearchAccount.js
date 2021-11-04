@@ -10,7 +10,11 @@ const SearchAccount = () => {
     const [error, setError] = useState(null);
     const submitRequest = async (e) => {
         e.preventDefault();
-        await fetch(`${baseApiUrl}/Account`, 
+        if (accountId.length === 0) {
+            setError('Account ID is required')
+        }
+        else {
+            await fetch(`${baseApiUrl}/Account`, 
         {
             method: 'POST',
             headers: {
@@ -19,19 +23,20 @@ const SearchAccount = () => {
             body: JSON.stringify({ AccountId: accountId })
         }).then((response) => {
             if (response.ok) {
+                setError(null)
                 return response.json()
             }
             setError('Account could not be found')
             setAccountData(null)
             throw response;
         }).then((data) => setAccountData(data));
-
+        }
     }
     return (
         <div className='main-page'>
             <div className='search-section'>
                 <form className='search-form'>
-                    <input className='search-text' placeholder='Search Account' type='text' value={accountId} onChange={(e) => setAccountId(e.target.value)}/>
+                    <input className='search-text' placeholder='Search by Account ID' type='text' value={accountId} onChange={(e) => setAccountId(e.target.value)}/>
                     <button className='btn-submit' onClick={submitRequest}>Submit</button>
                 </form>   
             </div>

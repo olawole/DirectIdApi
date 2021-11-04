@@ -23,6 +23,11 @@ namespace DirectId.Api.Controllers
         {
             var result = await accountComposer.CalculateDailyBalancesAsync(accountRequest.AccountId);
 
+            if (result == null)
+            {
+                return NotFound("Account not found");
+            }
+
             return Ok(result);
         }
     }

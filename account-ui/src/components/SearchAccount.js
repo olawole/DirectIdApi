@@ -2,10 +2,12 @@ import React, {useState} from 'react'
 import './SearchAccount.css'
 import DailyBalance from './DailyBalance';
 import { baseApiUrl } from '../config';
+import AccountInfo from './AccountInfo';
 
 const SearchAccount = () => {
     const [accountId, setAccountId] = useState('');
     const [accountData, setAccountData] = useState(null);
+    const [error, setError] = useState(null);
     const submitRequest = async (e) => {
         e.preventDefault();
         await fetch(`${baseApiUrl}/Account`, 
@@ -19,10 +21,11 @@ const SearchAccount = () => {
             if (response.ok) {
                 return response.json()
             }
+            setError('Account could not be found')
+            setAccountData(null)
             throw response;
         }).then((data) => setAccountData(data));
 
-        console.log(accountData);
     }
     return (
         <div className='main-page'>
@@ -36,30 +39,11 @@ const SearchAccount = () => {
                 { accountData && (
                 <div className='account-result'>
                     <h2>Account Information</h2>
-                    <div className='account-info'>
-                        <h4 className='title'>Account ID </h4>
-                        <h4>{accountData.accountId}</h4>
-                    </div>
-                    <div className='account-info'>
-                        <h4 className='title'>Account Type</h4>
-                        <h4>{accountData.accountType}</h4>
-                    </div>
-                    <div className='account-info'>
-                        <h4 className='title'>Display Name </h4>
-                        <h4>{accountData.displayName}</h4>
-                    </div>
-                    <div className='account-info'>
-                        <h4 className='title'>Total Credits </h4>
-                        <h4>£{accountData.totalCredits}</h4>
-                    </div>
-                    <div className='account-info'>
-                        <h4 className='title'>Total Debits </h4>
-                        <h4>£{accountData.totalDebits}</h4>
-                    </div>
-                    <div className='account-info'>
-                        <h4 className='title'>Currency Code</h4>
-                        <h4>£{accountData.currencyCode}</h4>
-                    </div>
+                    <AccountInfo title='Account ID' data={accountData.accountId} />
+                    <AccountInfo title='Account Type' data={accountData.accountType} />
+                    <AccountInfo title='Total Credits' data={accountData.totalCredits} currency='£' />
+                    <AccountInfo title='Total Debits' data={accountData.totalDebits} currency='£' />
+                    <AccountInfo title='Currency Code' data={accountData.currencyCode} />
                     <h2>Daily Balances</h2>
                     <div className='balance-heading'>
                         <h3>Date</h3>
@@ -70,7 +54,9 @@ const SearchAccount = () => {
                     </div>
                 </div>) 
                 }
-                { !accountData && (<h4 className='no-result'>No result</h4>)}
+            </div>
+            <div>
+            { error && (<h4 className='no-result'>{error}</h4>)}
             </div>
         </div>
                     
